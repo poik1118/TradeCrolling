@@ -76,3 +76,10 @@ Task 3을 확장하여 주기적으로 자동으로 데이터 수집 및 DB 저�
 
 <br>Document Link: https://docs.google.com/forms/d/1Ng_GmgsnWGAL06sjmTDXA6WhAcLn1ahDD9taVHn9Q2o/viewform?pli=1&pli=1&edit_requested=true
 <br>Tutorial Video Link: https://www.youtube.com/watch?v=uJn2SArkhvk
+
+### How to Run?
+Please Download Requirements in your Terminal:
+pip install selenium helium python-dotenv
+
+Create .env file and Setting your Tradingview Account:
+userEMAIL = "Your_TrainingView_Account_Email" / userPASSWORD = "Your_TrainingView_Account_Password"
