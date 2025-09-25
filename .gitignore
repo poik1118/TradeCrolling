@@ -1,0 +1,19 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local data/session
+tradingview_cookies.json
+chrome_profile/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
