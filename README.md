@@ -1,5 +1,7 @@
 # 주식 차트 데이터의 자동 크롤링 메크로 개발
 
+---
+
 💰 상금 정리
 
     튜토리얼 : 튜토리얼 완료하고 신청 확인되면 2만원 상당(선착순 10팀)
@@ -8,6 +10,7 @@
     Task 3: 완료 시 10만원 (선착순 3팀에게 지급)
     Task 4: 완료 시 50만원 (선착순 1팀에게 지급)
 
+---
 
 📝 과제 상세
 
@@ -74,13 +77,18 @@ Task 3을 확장하여 주기적으로 자동으로 데이터 수집 및 DB 저�
 결과물:   
 상금 : 과제 완료시 오프라인 미팅 후 50만원 지급(선착순 1팀)
 
-<br>Document Link: https://docs.google.com/forms/d/1Ng_GmgsnWGAL06sjmTDXA6WhAcLn1ahDD9taVHn9Q2o/viewform?pli=1&pli=1&edit_requested=true
-<br>Tutorial Video Link: https://www.youtube.com/watch?v=uJn2SArkhvk
+---
+
+Document Link: https://docs.google.com/forms/d/1Ng_GmgsnWGAL06sjmTDXA6WhAcLn1ahDD9taVHn9Q2o/viewform?pli=1&pli=1&edit_requested=true<br>
+Tutorial Video Link: https://www.youtube.com/watch?v=uJn2SArkhvk
+
+---
 
 ### How to Run?
 Please Download Requirements:<br>
 pip install selenium helium python-dotenv
 
-
 Create .env file and Setting your Tradingview Account:<br>
 userEMAIL = "Your_TrainingView_Account_Email" / userPASSWORD = "Your_TrainingView_Account_Password"
+
+---
