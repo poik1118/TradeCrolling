@@ -78,7 +78,7 @@ Task 3을 확장하여 주기적으로 자동으로 데이터 수집 및 DB 저�
 <br>Tutorial Video Link: https://www.youtube.com/watch?v=uJn2SArkhvk
 
 ### How to Run?
-Please Download Requirements in your Terminal:<br>
+Please Download Requirements:<br>
 pip install selenium helium python-dotenv
 
 
