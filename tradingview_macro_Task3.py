@@ -59,7 +59,10 @@ TIMEFRAMES = [
 # 지표 추가시 검색에 사용할 키워드들 (예: 'Relative Strength Index', 'MACD' 등)
 INDICATORS = [s.strip() for s in os.environ.get("TV_INDICATORS", "Relative Strength Index, MACD").split(",")]
 
-# 종목 리스트 (최대 30개). 환경변수 TV_TICKERS 또는 tickers.txt(한 줄 한 종목)로도 입력 가능
+# 종목 리스트 (최대 30개). 환경변수 TV_TICKERS 또는 tickers.txt(한 줄. 한 종목)로도 입력 가능
+TV_TICKERS = ["MSFT", "AAPL", "NVDA", "GOOGL", "AMZN", "META", "GOOG", "BRK.B", "LLY", "AVGO",\
+              "V", "JPM", "TSLA", "XOM", "WMT", "UNH", "MA", "JNJ", "PG", "HD",\
+              "ORCL", "COST", "MRK", "BAC", "ABBV", "CVX", "CRM", "KO", "NFLX", "AMD"]
 DEFAULT_TICKERS = ["GOOG"]
 
 
@@ -67,6 +70,7 @@ DEFAULT_TICKERS = ["GOOG"]
 # 유틸
 # -----------------------------
 def read_tickers() -> List[str]:
+    """종목 리스트 읽기 (환경변수, tickers.txt, 기본값 순)"""
     # 1) 환경변수
     env_val = os.environ.get("TV_TICKERS", "").strip()
     if env_val:
@@ -79,8 +83,8 @@ def read_tickers() -> List[str]:
         if lines:
             return lines[:30]
 
-    # 3) 기본값
-    return DEFAULT_TICKERS
+    # 3) 기본값 / or DEFAULT_TICKERS 사용ㄴㄴ
+    return TV_TICKERS
 
 
 def ensure_dir(p: Path) -> None:
@@ -244,7 +248,7 @@ def add_indicator(driver: webdriver.Chrome, keyword: str) -> None:
                     if el.is_displayed():
                         el.clear()
                         el.send_keys(keyword)
-                        time.sleep(1.0)
+                        time.sleep(1)
                         typed = True
                         break
                 if typed: break
@@ -303,7 +307,7 @@ def add_indicator(driver: webdriver.Chrome, keyword: str) -> None:
         except Exception:
             try: driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
             except Exception: pass
-        ensure_dialog_closed(driver, 4); focus_chart_canvas(driver)
+        ensure_dialog_closed(driver, 3); focus_chart_canvas(driver)
 
         if clicked:
             print(f"[INFO] 지표 추가 완료: {keyword}")
@@ -327,7 +331,7 @@ def export_csv(driver: webdriver.Chrome) -> None:
     opened = False
     for xp in export_btn_candidates:
         try:
-            WebDriverWait(driver, 8).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
+            WebDriverWait(driver, 4).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
             time.sleep(0.8)
             opened = True
             break
@@ -345,7 +349,7 @@ def export_csv(driver: webdriver.Chrome) -> None:
     clicked = False
     for xp in item_candidates:
         try:
-            WebDriverWait(driver, 8).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
+            WebDriverWait(driver, 4).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
             time.sleep(0.8)
             clicked = True
             break
@@ -363,7 +367,7 @@ def export_csv(driver: webdriver.Chrome) -> None:
         ]
         for xp in bars_candidates:
             try:
-                WebDriverWait(driver, 6).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
+                WebDriverWait(driver, 4).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
                 time.sleep(0.5)
                 break
             except Exception:
@@ -376,7 +380,7 @@ def export_csv(driver: webdriver.Chrome) -> None:
         ]
         for xp in iso_candidates:
             try:
-                WebDriverWait(driver, 6).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
+                WebDriverWait(driver, 4).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
                 time.sleep(0.5)
                 break
             except Exception:
@@ -389,7 +393,7 @@ def export_csv(driver: webdriver.Chrome) -> None:
         ]
         for xp in export_confirm_candidates:
             try:
-                WebDriverWait(driver, 6).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
+                WebDriverWait(driver, 4).until(EC.element_to_be_clickable((By.XPATH, xp))).click()
                 time.sleep(0.5)
                 break
             except Exception:
@@ -426,28 +430,29 @@ def wait_for_download(download_dir: Path, timeout: int = 60) -> Path:
 def run_for_symbol(driver: webdriver.Chrome, symbol: str, out_root: Path) -> None:
     print(f"\n===== SYMBOL: {symbol} =====")
 
-    # 1) 먼저 기본 차트 열고(무간격) 보조지표를 '한 번' 추가
-    #    (동일 레이아웃/심볼에서는 인디케이터가 유지되는 경우가 많음)
-    go_chart(driver, symbol, interval=None)
-    for kw in INDICATORS:
-        add_indicator(driver, kw)
-
-    # 2) 각 시간프레임을 URL 파라미터로 직접 진입 → 드래그 로딩(필요 시) → CSV 내보내기
+    # 각 시간프레임을 URL 파라미터로 직접 진입 → 지표 추가 → 데이터 다운로드
     for tf_short, tf_label, url_interval, requires_lazy in TIMEFRAMES:
         print(f"\n-- Timeframe: {tf_short} ({tf_label}) --")
 
-        # 메뉴 클릭 대신 URL 파라미터로 안정적으로 진입
+        # 1. 메뉴 클릭 대신 URL 파라미터로 안정적으로 진입
         go_chart(driver, symbol, interval=url_interval)
-        time.sleep(2)
+        time.sleep(2) # 차트 로딩 대기
 
-        # 일/시/10분 등 지연 로딩이 필요한 프레임에서 과거 데이터 끌어오기
+        # 2. 페이지 이동 후, 이 시점에서 지표를 다시 추가
+        print(f"   Adding indicators for {tf_short}...")
+        for kw in INDICATORS:
+            add_indicator(driver, kw)
+        # 잠시 대기하여 지표가 완전히 그려지도록 합니다.
+        time.sleep(3)
+
+        # 3. 일/시/10분 등 지연 로딩이 필요한 프레임에서 과거 데이터 끌어오기
         if requires_lazy:
             lazy_load_short_tf(driver, tf_short, tf_label)
 
-        # CSV 내보내기
+        # 4. CSV 내보내기
         export_csv(driver)
 
-        # 저장 경로 구성 및 파일 이동/이름 변경
+        # 5. 저장 경로 구성 및 파일 이동/이름 변경
         tf_dir = out_root / symbol / tf_short
         ensure_dir(tf_dir)
         latest = wait_for_download(out_root)
@@ -497,7 +502,7 @@ def ensure_dialog_closed(driver, timeout=4):
 
 def focus_chart_canvas(driver):
     try:
-        canvas = WebDriverWait(driver, 5).until(
+        canvas = WebDriverWait(driver, 4).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'canvas[data-name="pane-top-canvas"]'))
         )
         ActionChains(driver).move_to_element_with_offset(canvas, 5, 5).click().perform()
